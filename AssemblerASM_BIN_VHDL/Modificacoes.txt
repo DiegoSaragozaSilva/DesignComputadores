@@ -1,0 +1,7 @@
+Modificações propostas
+
+1) Linhas vazias são válidas agora. Durante o tratamento do arquivo ASM as linhas vazias serão ignoradas e não resultarão em uma instrução.
+
+2) Linhas contendo apenas comentários serão válidas. No final, estas se tornarão comentários em VHDL que vão tomar uma linha por completo, mas não se tornarão instruções.
+
+3) Inclusão do nono bit do imediato.

@@ -1,16 +1,75 @@
-JSR @14	#Deve desviar para a posição 14
-JMP @5	#Deve desviar para a posição 5
-JEQ @9	#Deve desviar para a posição 9
-NOP
-NOP
-LDI $5	#Carrega acumulador com valor 5
-STA $0	#Armazena 5 na posição 0 da memória
-CEQ @0	#A Comparação deve fazer o flagIgual ser 1
-JMP @2	#Vai testar o flagIgual depois do jump
-NOP
-LDI $4	#Carrega acumulador com valor 4
-CEQ @0	#Compara com valor 5, deve fazer o flagIgual ser 0
-JEQ @3	#Não deve ocorrer o desvio
-JMP @13	#Fim. Deve ficar neste laço
-NOP
-RET		#Retorna para a posição 1
+LDI $0		# Zera os displays de 7 segmentos
+STA @288
+STA @289
+STA @290
+STA @291
+STA @292
+STA @293
+LDI $0
+STA @256	# Apaga todos os LEDs
+STA @257
+STA @258
+LDI $0		# Zerando as memórias de contador
+STA @0		# Unidade
+STA @1		# Dezena
+STA @2		# Centena
+LDI $1		# Loop principal | Checando se KEY0 foi pressionado
+CEQ @352
+JEQ @20		# Caso KEY0 == 1 vai para subrotina de incremento de valor
+JMP @21
+JSR @32
+LDA @0		# Carrega os valores do contador nos displays
+STA @288
+LDA @1
+STA @289
+LDA @2
+STA @290        # Vai para a subrotina de verificar o limite de contagem [NA LINHA DE BAIXO]
+LDI $1		# Checando se FPGA_RESET foi pressionado
+CEQ @356
+JEQ @0		# Caso FPGA_RESET == 1 reinicia o programa, zerando a contagem e displays
+JMP @16		# Reinicia o loop
+LDI $9		# Rotina de incremento de valor
+STA @3
+LDA @0
+CEQ @3
+JEQ @37
+JMP @40
+LDI $0
+STA @0		# Caso MEM[0] == 9, a contagem é zerada nesta casa, caso não, seu valor é incrementado em 1
+JMP @46		# Pula para a próxima casa
+LDI $1
+STA @3
+LDA @0
+SOMA @3
+LDA @0		# Incrementa MEM[0] em 1
+RET		# Finaliza a subrotina
+LDI $9
+STA @3
+LDA @1
+CEQ @3
+JEQ @52
+JMP @55
+LDI $0
+STA @1		# Caso MEM[1] == 9, a contagem nesta casa é zerada, caso não, seu valor é incrementado em 1
+JMP @61		# Pula para a próxima casa
+LDI $1
+STA @3
+LDA @1
+SOMA @3
+LDA @1		# Incrementa MEM[1] em 1
+JMP @45		# Finaliza a subrotina
+LDI $9
+STA @3
+LDA @2
+CEQ @3
+JEQ @67
+JMP @70
+LDI $0
+STA @2		# Caso MEM [2] == 9, a contagem nesta casa é zerada, caso não, seu valor é incrementado em 1
+JMP @45		# Finaliza subrotina
+LDI $1
+STA @3
+LDA @2
+SOMA @3
+STA @2		# Incrementa MEM[2] em 1
+JMP @45		# Finaliza subrotina

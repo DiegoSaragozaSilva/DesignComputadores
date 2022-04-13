@@ -93,16 +93,16 @@ mne =	{
 #em um valor hexadecimal de 2 dígitos (8 bits)
 def  converteArroba(line):
     line = line.split('@')
-    line[1] = hex(int(line[1]))[2:].upper().zfill(2)
-    line = ''.join(line)
+    ans = (int(line[0], 16) << 9) + int(line[1])
+    line = ''.join('{0:013b}'.format(ans))
     return line
  
 #Converte o valor após o caractere cifrão'$'
 #em um valor hexadecimal de 2 dígitos (8 bits) 
 def  converteCifrao(line):
     line = line.split('$')
-    line[1] = hex(int(line[1]))[2:].upper().zfill(2)
-    line = ''.join(line)
+    ans = (int(line[0], 16) << 9) + int(line[1])
+    line = ''.join('{:013b}'.format(ans))
     return line
         
 #Define a string que representa o comentário
@@ -155,24 +155,22 @@ with open(destinoBIN, "w") as f:  #Abre o destino BIN
             instrucaoLine = defineInstrucao(line).replace("\n","") #Define a instrução. Ex: JSR @14
             
             instrucaoLine = trataMnemonico(instrucaoLine) #Trata o mnemonico. Ex(JSR @14): x"9" @14
-                  
             if '@' in instrucaoLine: #Se encontrar o caractere arroba '@' 
                 instrucaoLine = converteArroba(instrucaoLine) #converte o número após o caractere Ex(JSR @14): x"9" x"0E"
-                    
+
             elif '$' in instrucaoLine: #Se encontrar o caractere cifrao '$' 
                 instrucaoLine = converteCifrao(instrucaoLine) #converte o número após o caractere Ex(LDI $5): x"4" x"05"
                 
             else: #Senão, se a instrução nao possuir nenhum imediator, ou seja, nao conter '@' ou '$'
                 instrucaoLine = instrucaoLine.replace("\n", "") #Remove a quebra de linha
-                instrucaoLine = instrucaoLine + '00' #Acrescenta o valor x"00". Ex(RET): x"A" x"00"
+                instrucaoLine = '{0:013b}'.format(int(instrucaoLine, 16) << 9)    #Acrescenta o valor x"00". Ex(RET): x"A" x"00"
                 
-            
-            line = 'tmp(' + str(cont) + ') := x"' + instrucaoLine + '";\t-- ' + comentarioLine + '\n'  #Formata para o arquivo BIN
-                                                                                                       #Entrada => 1. JSR @14 #comentario1
-                                                                                                       #Saída =>   1. tmp(0) := x"90E";	-- JSR @14 	#comentario1
-                                        
-            cont+=1 #Incrementa a variável de contagem, utilizada para incrementar as posições de memória no VHDL
-            f.write(line) #Escreve no arquivo BIN.txt
-            
-            print(line,end = '') #Print apenas para debug
+            line = 'tmp(' + str(cont) + ') := "' + instrucaoLine + '";\t-- ' + comentarioLine + '\n'  #Formata para o arquivo BIN
+                                                                                                           #Entrada => 1. JSR @14 #comentario1
+                                                                                                           #Saída =>   1. tmp(0) := x"90E";	-- JSR @14 	
+                                                                                                           #comentario1 cont+=1 #Incrementa a variável de contagem, utilizada para incrementar as posições de memória no VHDL
+        cont += 1
+        f.write(line) #Escreve no arquivo BIN.txt
+           
+    print(line,end = '') #Print apenas para debug
 
